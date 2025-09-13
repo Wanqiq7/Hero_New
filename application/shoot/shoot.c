@@ -7,7 +7,7 @@
 #include "general_def.h"
 
 /* 对于双发射机构的机器人,将下面的数据封装成结构体即可,生成两份shoot应用实例 */
-static DJIMotorInstance *friction_lf, *friction_rf,*friction_lb, *friction_rb, *loader; // 拨盘电机
+static DJIMotorInstance *friction_lf, *friction_rf, *friction_lb, *friction_rb, *loader; // 拨盘电机
 // static servo_instance *lid; 需要增加弹舱盖
 
 static Publisher_t *shoot_pub;
@@ -18,12 +18,12 @@ static Shoot_Upload_Data_s shoot_feedback_data; // 来自cmd的发射控制信�
 // dwt定时,计算冷却用
 static float hibernate_time = 0, dead_time = 0;
 
-void ShootInit()//已适配四摩擦轮发射机构
+void ShootInit() // 已适配四摩擦轮发射机构
 {
     // 左摩擦轮
     Motor_Init_Config_s friction_config = {
         .can_init_config = {
-            .can_handle = &hcan1,
+            .can_handle = &hcan2,
         },
         .controller_param_init_config = {
             .speed_PID = {
@@ -52,16 +52,20 @@ void ShootInit()//已适配四摩擦轮发射机构
             .motor_reverse_flag = MOTOR_DIRECTION_NORMAL,
         },
         .motor_type = M3508};
-    //左边摩擦轮
-    friction_config.can_init_config.tx_id = 7,
+    // 左边摩擦轮
+    friction_config.can_init_config.tx_id = 1,
     friction_lf = DJIMotorInit(&friction_config);
-    friction_config.can_init_config.tx_id = 7,
-    friction_lb = DJIMotorInit(&friction_config);
-    //右边摩擦轮
-    friction_config.can_init_config.tx_id = 8; // 改txid和方向就行
     friction_config.controller_setting_init_config.motor_reverse_flag = MOTOR_DIRECTION_REVERSE;
+    friction_config.can_init_config.tx_id = 2;
     friction_rf = DJIMotorInit(&friction_config);
+    // 第一排左右
+
+    friction_config.can_init_config.can_handle = &hcan1;
+    friction_config.can_init_config.tx_id = 8,
     friction_rb = DJIMotorInit(&friction_config);
+    friction_config.controller_setting_init_config.motor_reverse_flag = MOTOR_DIRECTION_NORMAL;
+    friction_config.can_init_config.tx_id = 7;
+    friction_lb = DJIMotorInit(&friction_config);
 
     // 拨盘电机
     Motor_Init_Config_s loader_config = {
@@ -146,18 +150,18 @@ void ShootTask()
         DJIMotorSetRef(loader, 0);             // 同时设定参考值为0,这样停止的速度最快
         break;
     // 单发模式,根据鼠标按下的时间,触发一次之后需要进入不响应输入的状态(否则按下的时间内可能多次进入,导致多次发射)
-    case LOAD_1_BULLET:                                                                     // 激活能量机关/干扰对方用,英雄用.
-        DJIMotorOuterLoop(loader, ANGLE_LOOP);                                              // 切换到角度环
-        DJIMotorSetRef(loader, loader->measure.total_angle + ONE_BULLET_DELTA_ANGLE);   // 控制量增加一发弹丸的角度
-        hibernate_time = DWT_GetTimeline_ms();                                              // 记录触发指令的时间
-        dead_time = 150;                                                                    // 完成1发弹丸发射的时间
+    case LOAD_1_BULLET:                                                               // 激活能量机关/干扰对方用,英雄用.
+        DJIMotorOuterLoop(loader, ANGLE_LOOP);                                        // 切换到角度环
+        DJIMotorSetRef(loader, loader->measure.total_angle + ONE_BULLET_DELTA_ANGLE); // 控制量增加一发弹丸的角度
+        hibernate_time = DWT_GetTimeline_ms();                                        // 记录触发指令的时间
+        dead_time = 150;                                                              // 完成1发弹丸发射的时间
         break;
     // 三连发,如果不需要后续可能删除
     case LOAD_3_BULLET:
-        DJIMotorOuterLoop(loader, ANGLE_LOOP);                                                  // 切换到速度环
+        DJIMotorOuterLoop(loader, ANGLE_LOOP);                                            // 切换到速度环
         DJIMotorSetRef(loader, loader->measure.total_angle + 3 * ONE_BULLET_DELTA_ANGLE); // 增加3发
-        hibernate_time = DWT_GetTimeline_ms();                                                  // 记录触发指令的时间
-        dead_time = 300;                                                                        // 完成3发弹丸发射的时间
+        hibernate_time = DWT_GetTimeline_ms();                                            // 记录触发指令的时间
+        dead_time = 300;                                                                  // 完成3发弹丸发射的时间
         break;
     // 连发模式,对速度闭环,射频后续修改为可变,目前固定为1Hz
     case LOAD_BURSTFIRE:
@@ -184,27 +188,27 @@ void ShootTask()
         {
         case SMALL_AMU_15:
             DJIMotorSetRef(friction_lf, 0);
-                DJIMotorSetRef(friction_lb, 0);
-                DJIMotorSetRef(friction_rb, 0);
+            DJIMotorSetRef(friction_lb, 0);
+            DJIMotorSetRef(friction_rb, 0);
             DJIMotorSetRef(friction_rf, 0);
             break;
         case SMALL_AMU_18:
             DJIMotorSetRef(friction_lf, 0);
-                DJIMotorSetRef(friction_lb, 0);
-                DJIMotorSetRef(friction_rb, 0);
+            DJIMotorSetRef(friction_lb, 0);
+            DJIMotorSetRef(friction_rb, 0);
             DJIMotorSetRef(friction_rf, 0);
             break;
         case SMALL_AMU_30:
-                DJIMotorSetRef(friction_lf, 0);
-                DJIMotorSetRef(friction_lb, 0);
-                DJIMotorSetRef(friction_rb, 0);
-                DJIMotorSetRef(friction_rf, 0);
+            DJIMotorSetRef(friction_lf, 0);
+            DJIMotorSetRef(friction_lb, 0);
+            DJIMotorSetRef(friction_rb, 0);
+            DJIMotorSetRef(friction_rf, 0);
             break;
         default: // 当前为了调试设定的默认值4000,因为还没有加入裁判系统无法读取弹速.
-                DJIMotorSetRef(friction_lf, 3000);
-                DJIMotorSetRef(friction_lb, 3000);
-                DJIMotorSetRef(friction_rb, 3000);
-                DJIMotorSetRef(friction_rf, 3000);
+            DJIMotorSetRef(friction_lf, 3000);
+            DJIMotorSetRef(friction_lb, 3000);
+            DJIMotorSetRef(friction_rb, 3000);
+            DJIMotorSetRef(friction_rf, 3000);
             break;
         }
     }

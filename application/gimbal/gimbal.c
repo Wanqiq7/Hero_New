@@ -16,17 +16,17 @@ static Gimbal_Ctrl_Cmd_s gimbal_cmd_recv;         // 来自cmd的控制信息
 
 // static BMI088Instance *bmi088; // 云台IMU
 void GimbalInit()
-{   
+{
     gimba_IMU_data = INS_Init(); // IMU先初始化,获取姿态数据指针赋给yaw电机的其他数据来源
     // YAW
     Motor_Init_Config_s yaw_config = {
         .can_init_config = {
             .can_handle = &hcan2,
-            .tx_id = 2,
+            .tx_id = 5,
         },
         .controller_param_init_config = {
             .speed_PID = {
-                .Kp = 21,  // 50
+                .Kp = 21,   // 50
                 .Ki = 0.82, // 200
                 .Kd = -3,
                 .Improve = PID_Trapezoid_Intergral | PID_Integral_Limit | PID_Derivative_On_Measurement,
@@ -48,13 +48,13 @@ void GimbalInit()
     Motor_Init_Config_s pitch_config = {
         .can_init_config = {
             .can_handle = &hcan2,
-            .tx_id = 1,
+            .tx_id = 6,
         },
         .controller_param_init_config = {
             .speed_PID = {
-                .Kp = 9,  // 50
+                .Kp = 9,    // 50
                 .Ki = 0.01, // 350
-                .Kd = 5,   // 0
+                .Kd = 5,    // 0
                 .Improve = PID_Trapezoid_Intergral | PID_Integral_Limit | PID_Derivative_On_Measurement,
                 .IntegralLimit = 19999,
                 .MaxOut = 29999,
@@ -67,7 +67,7 @@ void GimbalInit()
             .angle_feedback_source = OTHER_FEED,
             .speed_feedback_source = OTHER_FEED,
             .close_loop_type = SPEED_LOOP,
-            .motor_reverse_flag = MOTOR_DIRECTION_NORMAL,
+            .motor_reverse_flag = MOTOR_DIRECTION_REVERSE,
         },
         .motor_type = M3508,
     };
@@ -123,6 +123,7 @@ void GimbalTask()
 
     // 设置反馈数据,主要是imu和yaw的ecd
     gimbal_feedback_data.gimbal_imu_data = *gimba_IMU_data;
+
     gimbal_feedback_data.yaw_motor_single_round_angle = yaw_motor->measure.angle_single_round;
 
     // 推送消息
