@@ -62,20 +62,20 @@ void ChassisInit()
         .can_init_config.can_handle = &hcan1,
         .controller_param_init_config = {
             .speed_PID = {
-                .Kp = 1.5f, // 4.5
+                .Kp = 2.5f, // 4.5
                 .Ki = 0,    // 0
                 .Kd = 0,    // 0
                 .IntegralLimit = 3000,
                 .Improve = PID_Trapezoid_Intergral | PID_Integral_Limit | PID_Derivative_On_Measurement,
-                .MaxOut = 5000,
+                .MaxOut = 15000,
             },
             .current_PID = {
-                .Kp = 0.5, // 0.4
-                .Ki = 0,   // 0
+                .Kp = 1.5f, // 0.4
+                .Ki = 0,    // 0
                 .Kd = 0,
                 .IntegralLimit = 3000,
                 .Improve = PID_Trapezoid_Intergral | PID_Integral_Limit | PID_Derivative_On_Measurement,
-                .MaxOut = 5000,
+                .MaxOut = 15000,
             },
         },
         .controller_setting_init_config = {
@@ -92,11 +92,11 @@ void ChassisInit()
     motor_lf = DJIMotorInit(&chassis_motor_config);
 
     chassis_motor_config.can_init_config.tx_id = 3;
-    chassis_motor_config.controller_setting_init_config.motor_reverse_flag = MOTOR_DIRECTION_REVERSE;
+    chassis_motor_config.controller_setting_init_config.motor_reverse_flag = MOTOR_DIRECTION_NORMAL;
     motor_rf = DJIMotorInit(&chassis_motor_config);
 
     chassis_motor_config.can_init_config.tx_id = 1;
-    chassis_motor_config.controller_setting_init_config.motor_reverse_flag = MOTOR_DIRECTION_REVERSE;
+    chassis_motor_config.controller_setting_init_config.motor_reverse_flag = MOTOR_DIRECTION_NORMAL;
     motor_lb = DJIMotorInit(&chassis_motor_config);
 
     chassis_motor_config.can_init_config.tx_id = 4;
@@ -145,10 +145,10 @@ void ChassisInit()
  */
 static void MecanumCalculate()
 {
-    vt_lf = -chassis_vx - chassis_vy - chassis_cmd_recv.wz * LF_CENTER;
-    vt_rf = -chassis_vx + chassis_vy - chassis_cmd_recv.wz * RF_CENTER;
-    vt_lb = chassis_vx - chassis_vy - chassis_cmd_recv.wz * LB_CENTER;
-    vt_rb = chassis_vx + chassis_vy - chassis_cmd_recv.wz * RB_CENTER;
+    vt_lf = 2.5 * (-chassis_vx - chassis_vy) - chassis_cmd_recv.wz * LF_CENTER;
+    vt_rf = 2.5 * (-chassis_vx + chassis_vy) - chassis_cmd_recv.wz * RF_CENTER;
+    vt_lb = 2.5 * (chassis_vx - chassis_vy) - chassis_cmd_recv.wz * LB_CENTER;
+    vt_rb = 2.5 * (chassis_vx + chassis_vy) - chassis_cmd_recv.wz * RB_CENTER;
 }
 
 /**
