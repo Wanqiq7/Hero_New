@@ -90,7 +90,7 @@ void RobotCMDInit()
     //         .MaxOut = 100,
     //     },
     // };
-    //bmi088_test = BMI088Register(&bmi088_config);
+    // bmi088_test = BMI088Register(&bmi088_config);
     rc_data = RemoteControlInit(&huart3);   // 修改为对应串口,注意如果是自研板dbus协议串口需选用添加了反相器的那个
     vision_recv_data = VisionInit(&huart6); // 视觉通信串口,由原来框架的US1改为适配现车的US6
 
@@ -174,8 +174,8 @@ static void RemoteControlSet()
     // 左侧开关状态为[下],或视觉未识别到目标,纯遥控器拨杆控制
     if (switch_is_down(rc_data[TEMP].rc.switch_left) || vision_recv_data->target_state == NO_TARGET)
     { // 按照摇杆的输出大小进行角度增量,增益系数需调整
-        gimbal_cmd_send.yaw += 0.005f * (float)rc_data[TEMP].rc.rocker_l_;
-        gimbal_cmd_send.pitch += 0.001f * (float)rc_data[TEMP].rc.rocker_l1;
+        gimbal_cmd_send.yaw = 10.0f * (float)rc_data[TEMP].rc.rocker_l_;
+        gimbal_cmd_send.pitch = 10.0f * (float)rc_data[TEMP].rc.rocker_l1;
     }
     // 云台软件限位
 
@@ -319,7 +319,7 @@ static void EmergencyHandler()
 /* 机器人核心控制任务,200Hz频率运行(必须高于视觉发送频率) */
 void RobotCMDTask()
 {
-   // BMI088Acquire(bmi088_test,&bmi088_data) ;
+    // BMI088Acquire(bmi088_test,&bmi088_data) ;
     // 从其他应用获取回传数据
 #ifdef ONE_BOARD
     SubGetMessage(chassis_feed_sub, (void *)&chassis_fetch_data);

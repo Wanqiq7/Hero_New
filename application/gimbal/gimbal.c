@@ -26,9 +26,9 @@ void GimbalInit()
         },
         .controller_param_init_config = {
             .speed_PID = {
-                .Kp = 21,   // 50
-                .Ki = 0.82, // 200
-                .Kd = -3,
+                .Kp = 50,  // 50
+                .Ki = 200, // 200
+                .Kd = 0,
                 .Improve = PID_Trapezoid_Intergral | PID_Integral_Limit | PID_Derivative_On_Measurement,
                 .IntegralLimit = 19999,
                 .MaxOut = 29999,
@@ -52,9 +52,9 @@ void GimbalInit()
         },
         .controller_param_init_config = {
             .speed_PID = {
-                .Kp = 9,    // 50
-                .Ki = 0.01, // 350
-                .Kd = 5,    // 0
+                .Kp = 50,  // 50
+                .Ki = 350, // 350
+                .Kd = 0,   // 0
                 .Improve = PID_Trapezoid_Intergral | PID_Integral_Limit | PID_Derivative_On_Measurement,
                 .IntegralLimit = 19999,
                 .MaxOut = 29999,
@@ -67,7 +67,7 @@ void GimbalInit()
             .angle_feedback_source = OTHER_FEED,
             .speed_feedback_source = OTHER_FEED,
             .close_loop_type = SPEED_LOOP,
-            .motor_reverse_flag = MOTOR_DIRECTION_REVERSE,
+            .motor_reverse_flag = MOTOR_DIRECTION_NORMAL,
         },
         .motor_type = M3508,
     };
@@ -125,7 +125,6 @@ void GimbalTask()
     gimbal_feedback_data.gimbal_imu_data = *gimba_IMU_data;
 
     gimbal_feedback_data.yaw_motor_single_round_angle = yaw_motor->measure.angle_single_round;
-
     // 推送消息
     PubPushMessage(gimbal_pub, (void *)&gimbal_feedback_data);
 }

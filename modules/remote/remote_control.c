@@ -83,7 +83,6 @@ static void sbus_to_rc(const uint8_t *sbus_buf)
         if ((key_with_shift & j) && !(key_last_with_shift & j))
             rc_ctrl[TEMP].key_count[KEY_PRESS_WITH_SHIFT][i]++;
     }
-
     memcpy(&rc_ctrl[LAST], &rc_ctrl[TEMP], sizeof(RC_ctrl_t)); // 保存上一次的数据,用于按键持续按下和切换的判断
 }
 
