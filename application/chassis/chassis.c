@@ -63,9 +63,9 @@ void ChassisInit()
         .controller_param_init_config = {
             .speed_PID = {
                 .Kp = 2.0f, // 4.5
-                .Ki = 0,    // 0
+                .Ki = 0.1f, // 0
                 .Kd = 0,    // 0
-                .IntegralLimit = 1000,
+                .IntegralLimit = 2000,
                 .Improve = PID_Trapezoid_Intergral | PID_Integral_Limit,
                 .MaxOut = 15000,
             },
@@ -73,7 +73,7 @@ void ChassisInit()
                 .Kp = 1.5f, // 0.4
                 .Ki = 0.1f, // 0
                 .Kd = 0,
-                .IntegralLimit = 1000,
+                .IntegralLimit = 2000,
                 .Improve = PID_Trapezoid_Intergral | PID_Integral_Limit,
                 .MaxOut = 15000,
             },
@@ -145,10 +145,10 @@ void ChassisInit()
  */
 static void MecanumCalculate()
 {
-    vt_lf = 2.5 * (-chassis_vx - chassis_vy) - chassis_cmd_recv.wz * LF_CENTER;
-    vt_rf = 2.5 * (-chassis_vx + chassis_vy) - chassis_cmd_recv.wz * RF_CENTER;
-    vt_lb = 2.5 * (chassis_vx - chassis_vy) - chassis_cmd_recv.wz * LB_CENTER;
-    vt_rb = 2.5 * (chassis_vx + chassis_vy) - chassis_cmd_recv.wz * RB_CENTER;
+    vt_lf = (-chassis_vx - chassis_vy) - chassis_cmd_recv.wz * LF_CENTER;
+    vt_rf = (-chassis_vx + chassis_vy) - chassis_cmd_recv.wz * RF_CENTER;
+    vt_lb = (chassis_vx - chassis_vy) - chassis_cmd_recv.wz * LB_CENTER;
+    vt_rb = (chassis_vx + chassis_vy) - chassis_cmd_recv.wz * RB_CENTER;
 }
 
 /**
@@ -214,7 +214,7 @@ void ChassisTask()
         chassis_cmd_recv.wz = 0;
         break;
     case CHASSIS_FOLLOW_GIMBAL_YAW: // 跟随云台,不单独设置pid,以误差角度平方为速度输出
-        chassis_cmd_recv.wz = -1.5f * chassis_cmd_recv.offset_angle * abs(chassis_cmd_recv.offset_angle);
+        chassis_cmd_recv.wz = 10.0f * chassis_cmd_recv.offset_angle * abs(chassis_cmd_recv.offset_angle);
         break;
     case CHASSIS_ROTATE: // 自旋,同时保持全向机动;当前wz维持定值,后续增加不规则的变速策略
         chassis_cmd_recv.wz = 4000;
