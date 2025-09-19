@@ -312,9 +312,8 @@ static void EmergencyHandler() {
     // 这里可以根据需要设置进入 READY 的条件，
     // 例如，当中位或上位时进入 READY 状态
     // 为了安全，通常需要一个明确的动作来“解锁”机器人
-    if (robot_state ==
-        ROBOT_STOP) // 只有当机器人从STOP状态恢复时，才设置一次READY
-    {
+    // 只有当机器人从STOP状态恢复时，才设置一次READY
+    if (robot_state == ROBOT_STOP) {
       robot_state = ROBOT_READY;
       shoot_cmd_send.shoot_mode = SHOOT_ON; // 恢复发射模块
       LOGINFO("[CMD] Robot reinstated, ready to operate.");

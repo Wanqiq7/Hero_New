@@ -35,6 +35,7 @@ static void f_Changing_Integration_Rate(PIDInstance *pid)
     }
 }
 
+//积分限幅
 static void f_Integral_Limit(PIDInstance *pid)
 {
     static float temp_Output, temp_Iout;
