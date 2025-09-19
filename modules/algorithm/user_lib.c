@@ -212,3 +212,5 @@ void MatInit(mat *m, uint8_t row, uint8_t col)
     m->numRows = row;
     m->pData = (float *)zmalloc(row * col * sizeof(float));
 }
+
+
